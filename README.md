@@ -120,20 +120,26 @@ How will we validate the functionality of the client
         way we can avoid the end to end testing or blockbox test with light weight unit test which 
         validate schema/contracts between producer and consumer
     
-Client should have
+Improvements should we want the library to go to production
     - Exponential Backoff https://api-docs.form3.tech/api.html#introduction-and-api-conventions-timeouts-rate-limiting-and-retry-strategy
     - Circuit Breaking
     - Healthchecks
     - Metrics
     - Telemetry 
+    - Configurable logging
     
-    
-Libraries    
-- needed a uuid generator for test
+Rules Broken
+- needed a uuid generator for tests
 
 Issues Found
+Create
 1. No Validation on BankID
-2. The response is a mirror of the request parameters which does not match the specifications
+2. No validation on the number of names
+3. No validation on the status field
+4. No validation mapping the country requirements specified in the documentation highlight in the cucumber test
+5. The response is a mirror of the request parameters which does not match the specifications
+6. The fetch API has no UUID validation on the ID field inside of the payload
 
 Improvements
-- Builder(Validator) - could be simplified to use the country if always required
+- Validation of host environmental variable to make sure it matches the library expectations
+- Client current client method with an asynch version which returns a channel and runs the http & json deserialization asynchronously

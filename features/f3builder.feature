@@ -5,6 +5,8 @@ Feature: Form 3 Organisation - Account Builder
   aid engineers finding issues locally using faster and cheaper tests.
 
   Scenario Outline: building payload for accounts from various countries
+    Given a random organisationId
+    And a random accountId
     When we validate the "POST" account builder with properties
       | key               | value            |
       | Country           | <Country>        |
@@ -36,6 +38,8 @@ Feature: Form 3 Organisation - Account Builder
       | US      | 000000009   | NWBKGB22 | USABA      |               |      | Personal       |
 
   Scenario Outline: building payload for accounts from various countries
+    Given a random organisationId
+    And a random accountId
     When we validate the "POST" account builder with properties
       | key               | value            |
       | Country           | <Country>        |
@@ -64,3 +68,77 @@ Feature: Form 3 Organisation - Account Builder
       | NL      | 0000000010  | NWBKGB22 |            |               |                         | Business       |
       | NL      |             | NWBKGB22 | NOTNL      |               |                         | Business       |
 
+
+  Scenario Outline: building payload with names, alternative names and secondary identification
+    Given a random organisationId
+    And a random accountId
+    When we validate the "POST" account builder with properties
+      | key                       | value            |
+      | Country                   | <Country>        |
+      | BankId                    | <BankId>         |
+      | BIC                       | <BIC>            |
+      | BankIdCode                | <BankIdCode>     |
+      | AccountNumber             | <AccountNumber>  |
+      | IBAN                      | <IBAN>           |
+      | Classification            | <Classification> |
+      | Name                      | Shawn            |
+      | Name                      | Stefanel         |
+      | Name                      | Ritchie          |
+      | Name                      | Extra            |
+      | AlternativeNames          | Alternative      |
+      | AlternativeNames          | Name             |
+      | SecondaryIdentification   | Secondary        |
+      | Status                    | confirmed        |
+    Then we expect no validation errors
+    Examples:
+      | Country | BankId      | BIC      | BankIdCode | AccountNumber | IBAN | Classification |
+      | GB      | 000006      | NWBKGB22 | GBDSC      |               |      | Personal       |
+
+  Scenario Outline: building payload with too many names
+    Given a random organisationId
+    And a random accountId
+    When we validate the "POST" account builder with properties
+      | key                       | value            |
+      | Country                   | <Country>        |
+      | BankId                    | <BankId>         |
+      | BIC                       | <BIC>            |
+      | BankIdCode                | <BankIdCode>     |
+      | AccountNumber             | <AccountNumber>  |
+      | IBAN                      | <IBAN>           |
+      | Classification            | <Classification> |
+      | Name                      | Shawn            |
+      | Name                      | Stefanel         |
+      | Name                      | Ritchie          |
+      | Name                      | Extra            |
+      | Name                      | EvenMore         |
+      | AlternativeNames          | Alternative      |
+      | AlternativeNames          | Name             |
+      | SecondaryIdentification   | Secondary        |
+    Then we expect validation errors
+    Examples:
+      | Country | BankId      | BIC      | BankIdCode | AccountNumber | IBAN | Classification |
+      | GB      | 000006      | NWBKGB22 | GBDSC      |               |      | Personal       |
+
+  Scenario Outline: building payload with corrupted status
+    Given a random organisationId
+    And a random accountId
+    When we validate the "POST" account builder with properties
+      | key                       | value            |
+      | Country                   | <Country>        |
+      | BankId                    | <BankId>         |
+      | BIC                       | <BIC>            |
+      | BankIdCode                | <BankIdCode>     |
+      | AccountNumber             | <AccountNumber>  |
+      | IBAN                      | <IBAN>           |
+      | Classification            | <Classification> |
+      | Name                      | Shawn            |
+      | Name                      | Stefanel         |
+      | Name                      | Ritchie          |
+      | Name                      | Extra            |
+      | AlternativeNames          | Alternative      |
+      | AlternativeNames          | Name             |
+      | Status                    | CORRUPTED        |
+    Then we expect validation errors
+    Examples:
+      | Country | BankId      | BIC      | BankIdCode | AccountNumber | IBAN | Classification |
+      | GB      | 000006      | NWBKGB22 | GBDSC      |               |      | Personal       |

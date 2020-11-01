@@ -1,4 +1,4 @@
-package currency
+package form3
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -16,7 +17,6 @@ const (
 	F3BaseURL           = "F3BaseURL"
 	F3Timeout           = "F3Timeout"
 	F3MaxRetries        = "F3MaxRetries"
-	F3AccountRecordType = "accounts"
 )
 
 type F3Env struct {
@@ -69,26 +69,17 @@ func NewF3Client() (*F3Client, error) {
 	return SetupF3Client(clientEnv), nil
 }
 
-func (c *F3Client) CreateAccount(ctx context.Context, reqId string, orgId string, attributes *AccountAttributes) (*Payload, error) {
-
-	payload := &Payload{
-		Data: Data{
-			Id:             reqId,
-			OrganisationId: orgId,
-			RecordType:     F3AccountRecordType,
-			Attributes:     attributes,
-		},
-	}
-
+func (c *F3Client) CreateAccount(ctx context.Context, payload *Payload) (*Payload, error) {
 	byteArray, err := json.Marshal(payload)
 	if err != nil {
-		Logger.Println(err)
+		Logger.Println("error marshalling json payload for account creation")
 		return nil, fmt.Errorf("error marshalling payload: %+v - error: %w", payload, err)
 	}
 
 	url := fmt.Sprintf("http://%s/v1/organisation/accounts", c.Env.F3BaseURL)
 	req, err := http.NewRequest("POST", url, bytes.NewReader(byteArray))
 	if err != nil {
+		Logger.Printf("failed to creat new http request for %q", url)
 		return nil, fmt.Errorf("error creating request Method: 'Post' Url: %q - error: %w", url, err)
 	}
 
@@ -96,6 +87,31 @@ func (c *F3Client) CreateAccount(ctx context.Context, reqId string, orgId string
 	att := &AccountAttributes{}
 	res, err := c.request(req, att)
 	if err != nil {
+		Logger.Printf("error requesting POST %q", url)
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (c *F3Client) FetchAccount(ctx context.Context, accountId UUID) (*Payload, error) {
+	if err := accountId.IsValid(); err != nil {
+		Logger.Printf("UUID validation failed UUID: %s", accountId)
+		return nil, fmt.Errorf("invalid account id: %q. %w", accountId, err)
+	}
+
+	url := fmt.Sprintf("http://%s/v1/organisation/accounts/%s", c.Env.F3BaseURL, url.QueryEscape(string(accountId)))
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		Logger.Printf("failed to creat new http request for %q", url)
+		return nil, fmt.Errorf("error creating request Method: 'GET' Url: %q - error: %w", url, err)
+	}
+
+	req = req.WithContext(ctx)
+	att := &AccountAttributes{}
+	res, err := c.request(req, att)
+	if err != nil {
+		Logger.Printf("error requesting GET %q", url)
 		return nil, err
 	}
 
@@ -174,8 +190,8 @@ type Payload struct {
 }
 
 type Data struct {
-	Id             string       `json:"id"`
-	OrganisationId string       `json:"organisation_id"`
+	Id             UUID       	`json:"id"`
+	OrganisationId UUID       	`json:"organisation_id"`
 	RecordType     string       `json:"type"`
 	Version        uint32       `json:"version"`
 	CreateOn       time.Time    `json:"created_on"`
@@ -204,7 +220,7 @@ type F3StatusBadRequest struct {
 }
 
 func (e *F3StatusBadRequest) Error() string {
-	return fmt.Sprintf("Bad Request. Returned when the message contains invalid syntax."+
+	return fmt.Sprintf("Bad Request. Returned when the request submited doesn't meet server side validation"+
 		"\nerrorCode: %q\nerrorMessage: %q", e.ErrorCode, e.ErrorMessage)
 }
 

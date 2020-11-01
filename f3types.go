@@ -1,4 +1,4 @@
-package currency
+package form3
 
 import (
 	"fmt"
@@ -114,4 +114,21 @@ func (bid *BankId) IsValid() error {
 
 func (bid *BankId) IsZeroValue() bool {
 	return zeroValueBankId == *bid
+}
+
+type UUID string
+var uuidValidation = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"
+var zeroValueUUID = UUID("")
+
+func (u *UUID) IsValid() error {
+	match, _ := regexp.MatchString(uuidValidation, string(*u))
+	if !match {
+		return fmt.Errorf("uuid: %q did not match regex expression %q", *u, uuidValidation)
+	}
+
+	return nil
+}
+
+func (u *UUID) IsZeroValue() bool {
+	return zeroValueUUID == *u
 }

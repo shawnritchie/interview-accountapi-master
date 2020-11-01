@@ -1,4 +1,4 @@
-package currency
+package form3
 
 import (
 	"fmt"
@@ -20,8 +20,10 @@ func (state *f3ClientState) weExpectValidationErrors() error {
 }
 
 func (state *f3ClientState) weValidateTheAccountBuilderWithProperties(requestType string, accounts *messages.PickleStepArgument_PickleTable) error {
+	builder := NewAccountBuilder()
+	builder = builder.WithAccountId(state.accountId)
+	builder = builder.WithOrganisationId(state.organisationId)
 
-	builder := NewTypedAccountBuilder()
 	for i := 1; i < len(accounts.Rows); i++ {
 		key := accounts.Rows[i].Cells[0].Value
 		value := accounts.Rows[i].Cells[1].Value
@@ -41,6 +43,14 @@ func (state *f3ClientState) weValidateTheAccountBuilderWithProperties(requestTyp
 			builder = builder.WithIban(IBAN(value))
 		case "Classification":
 			builder = builder.WithAccountClassification(Classification(value))
+		case "Name":
+			builder = builder.WithName(Identifier(value))
+		case "AlternativeNames":
+			builder = builder.WithAlternativeNames(Identifier(value))
+		case "SecondaryIdentification":
+			builder = builder.WithSecondaryIdentification(Identifier(value))
+		case "Status":
+			builder = builder.WithStatus(Status(value))
 		}
 	}
 
@@ -48,14 +58,4 @@ func (state *f3ClientState) weValidateTheAccountBuilderWithProperties(requestTyp
 	state.errors = err
 
 	return nil
-}
-
-
-func containsError(errors []error, fx func(error) bool) bool {
-	for _, e := range errors {
-		if fx(e) {
-			return true
-		}
-	}
-	return false
 }

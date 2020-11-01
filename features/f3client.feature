@@ -7,7 +7,8 @@ Feature: Form 3 Organisation - Account Client
 
   Scenario Outline: creating minimal accounts from various countries
     Given an initiated Client
-    And an organisationId of "634e3a41-26b8-49f9-a23d-26fa92061f38"
+    And a random organisationId
+    And a random accountId
     When I send "POST" request to "/v1/organisation/accounts"
       | key               | value            |
       | Country           | <Country>        |
@@ -42,7 +43,8 @@ Feature: Form 3 Organisation - Account Client
 
   Scenario Outline: creating corrupted accounts and expecting failure
     Given an initiated Client
-    And an organisationId of "634e3a41-26b8-49f9-a23d-26fa92061f38"
+    And a random organisationId
+    And a random accountId
     When I send "POST" request to "/v1/organisation/accounts"
       | key               | value            |
       | Country           | <Country>        |
@@ -71,3 +73,103 @@ Feature: Form 3 Organisation - Account Client
 #      | NL      | 0000000010  | NWBKGB22 |            |               |                         | Business       |
 #      | NL      |             | NWBKGB22 | NOTNL      |               |                         | Business       |
 
+  Scenario Outline: creating an account with names, alternative names and secondary identification
+    Given an initiated Client
+    And a random organisationId
+    And a random accountId
+    When I send "POST" request to "/v1/organisation/accounts"
+      | key                       | value            |
+      | Country                   | <Country>        |
+      | BankId                    | <BankId>         |
+      | BIC                       | <BIC>            |
+      | BankIdCode                | <BankIdCode>     |
+      | AccountNumber             | <AccountNumber>  |
+      | IBAN                      | <IBAN>           |
+      | Classification            | <Classification> |
+      | Name                      | Shawn            |
+      | Name                      | Stefanel         |
+      | Name                      | Ritchie          |
+      | Name                      | Extra            |
+      | AlternativeNames          | Alternative      |
+      | AlternativeNames          | Name             |
+      | SecondaryIdentification   | Secondary        |
+      | Status                    | confirmed        |
+    Then we expect a valid response
+    Examples:
+      | Country | BankId      | BIC      | BankIdCode | AccountNumber | IBAN | Classification |
+      | GB      | 000006      | NWBKGB22 | GBDSC      |               |      | Personal       |
+
+#  Scenario Outline: creating an account with too many names
+#    Given an initiated Client
+#    And a random organisationId
+#    And a random accountId
+#    When I send "POST" request to "/v1/organisation/accounts"
+#      | key                       | value            |
+#      | Country                   | <Country>        |
+#      | BankId                    | <BankId>         |
+#      | BIC                       | <BIC>            |
+#      | BankIdCode                | <BankIdCode>     |
+#      | AccountNumber             | <AccountNumber>  |
+#      | IBAN                      | <IBAN>           |
+#      | Classification            | <Classification> |
+#      | Name                      | Shawn            |
+#      | Name                      | Stefanel         |
+#      | Name                      | Ritchie          |
+#      | Name                      | Extra            |
+#      | Name                      | TooMany          |
+#      | AlternativeNames          | Alternative      |
+#      | AlternativeNames          | Name             |
+#      | SecondaryIdentification   | Secondary        |
+#      | Status                    | confirmed        |
+#    Then we expect a bad request response
+#    Examples:
+#      | Country | BankId      | BIC      | BankIdCode | AccountNumber | IBAN | Classification |
+#      | GB      | 000006      | NWBKGB22 | GBDSC      |               |      | Personal       |
+
+#  Scenario Outline: creating an account with invalid status
+#    Given an initiated Client
+#    And a random organisationId
+#    And a random accountId
+#    When I send "POST" request to "/v1/organisation/accounts"
+#      | key                       | value            |
+#      | Country                   | <Country>        |
+#      | BankId                    | <BankId>         |
+#      | BIC                       | <BIC>            |
+#      | BankIdCode                | <BankIdCode>     |
+#      | AccountNumber             | <AccountNumber>  |
+#      | IBAN                      | <IBAN>           |
+#      | Classification            | <Classification> |
+#      | Name                      | Shawn            |
+#      | Name                      | Stefanel         |
+#      | Name                      | Ritchie          |
+#      | Name                      | Extra            |
+#      | AlternativeNames          | Alternative      |
+#      | AlternativeNames          | Name             |
+#      | SecondaryIdentification   | Secondary        |
+#      | Status                    | CORRUPTED        |
+#    Then we expect a bad request response
+#    Examples:
+#      | Country | BankId      | BIC      | BankIdCode | AccountNumber | IBAN | Classification |
+#      | GB      | 000006      | NWBKGB22 | GBDSC      |               |      | Personal       |
+
+  Scenario: fetching an account successfully
+    Given an initiated Client
+    And a random organisationId
+    And a random accountId
+    And a valid account has been registered
+    When I send "GET" request to "/v1/organisation/accounts/" with the accountId
+    Then we expect a valid response
+
+#  Scenario: fetching an account with an invalid uuid
+#    Given an initiated Client
+#    And a random organisationId
+#    And an invalid accountId
+#    When I send "GET" request to "/v1/organisation/accounts/" with the accountId
+#    Then we expect a validation error
+
+  Scenario: fetching an account for an account which does not exist
+    Given an initiated Client
+    And a random organisationId
+    And a random accountId
+    When I send "GET" request to "/v1/organisation/accounts/" with the accountId
+    Then we expect a http status code: Not Found

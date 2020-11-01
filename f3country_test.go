@@ -1,4 +1,4 @@
-package currency
+package form3
 
 import (
 	"errors"

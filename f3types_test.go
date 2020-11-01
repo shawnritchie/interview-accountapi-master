@@ -1,4 +1,4 @@
-package currency
+package form3
 
 import (
 	"testing"
@@ -104,8 +104,8 @@ func TestSwiftCodeValidation(t *testing.T) {
 		swiftCode   string
 		expectError bool
 	}{
-		{"Valid SwiftCode", "12345678", false},
-		{"Valid SwiftCode", "12345678901", false},
+		{"Valid SwiftCode", "ABCDEF12", false},
+		{"Valid SwiftCode", "ABCDEF12345", false},
 		{"Empty SwiftCode", "", true},
 		{"SwiftCode too short", "1234567", true},
 		{"SwiftCode too Long", "123456789012", true},
@@ -136,8 +136,9 @@ func TestIBANValidation(t *testing.T) {
 		iban        string
 		expectError bool
 	}{
-		{"Valid IBAN", "123456789012345678901234567890", false},
+		{"Valid IBAN", "GB33BUKB20201555555555", false},
 		{"Empty IBAN", "", true},
+		{"IBAN doesn't match regex", "abcdefghijkmnlopqrst", true},
 		{"IBAN too short", "1234567", true},
 		{"IBAN too Long", "1234567890123456789012345678901234567890", true},
 	}
@@ -192,6 +193,36 @@ func TestIdentifierValidation(t *testing.T) {
 			case false:
 				if err != nil {
 					t.Errorf("validation failed with %q on valid Identifier %q", err, i.identifier)
+				}
+			}
+		})
+	}
+}
+
+func TestUUIDValidation(t *testing.T) {
+	uuids := []struct {
+		scenario    string
+		uuid        string
+		expectError bool
+	}{
+		{"Valid UUID", "eac357e9-ab2e-4af6-86f3-1e7f08037bf4", false},
+		{"Empty UUID", "", true},
+		{"Invalid UUID", "abcdefghijkmnlopqrst", true},
+	}
+
+	for _, u := range uuids {
+		t.Run(u.scenario, func(t *testing.T) {
+			uuid := UUID(u.uuid)
+
+			err := uuid.IsValid()
+			switch u.expectError {
+			case true:
+				if err == nil {
+					t.Errorf("validation did not fail when it was expected too! invalid UUID %q", u.uuid)
+				}
+			case false:
+				if err != nil {
+					t.Errorf("validation failed with %q on valid UUID %q", err, u.uuid)
 				}
 			}
 		})
