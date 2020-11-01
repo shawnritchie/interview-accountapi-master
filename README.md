@@ -143,3 +143,38 @@ Create
 Improvements
 - Validation of host environmental variable to make sure it matches the library expectations
 - Client current client method with an asynch version which returns a channel and runs the http & json deserialization asynchronously
+
+
+F3Client
+    .Create()
+    .WithX()
+    .WithY()
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    
+F3Client
+    .Fetch()
+    .WithX()
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    
+F3Client
+    .List()
+    .WithX()
+    .Page(1)
+    .Size(10)
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    .Next()
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    .Prev()
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    .First
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    .Last()
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    

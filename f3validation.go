@@ -9,6 +9,7 @@ import (
 type Validator func(accountBuilder) []error
 type BuilderConstraint Validator
 
+var accountIdFieldMissing = missingFieldError("id")
 var countryFieldMissing = missingFieldError("country")
 var bicFieldMissing = missingFieldError("bic")
 var bankIdFieldMissing = missingFieldError("bank_id")

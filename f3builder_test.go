@@ -20,9 +20,9 @@ func (state *f3ClientState) weExpectValidationErrors() error {
 }
 
 func (state *f3ClientState) weValidateTheAccountBuilderWithProperties(requestType string, accounts *messages.PickleStepArgument_PickleTable) error {
-	builder := NewAccountBuilder()
-	builder = builder.WithAccountId(state.accountId)
-	builder = builder.WithOrganisationId(state.organisationId)
+	builder := state.F3Client.Create().
+		WithAccountId(state.accountId).
+		WithOrganisationId(state.organisationId)
 
 	for i := 1; i < len(accounts.Rows); i++ {
 		key := accounts.Rows[i].Cells[0].Value
@@ -54,8 +54,9 @@ func (state *f3ClientState) weValidateTheAccountBuilderWithProperties(requestTyp
 		}
 	}
 
-	_, err := builder.Build(requestType)
-	state.errors = err
+	errors := make(chan []error, 1)
+	builder.Validate(errors)
+	state.errors = <-errors
 
 	return nil
 }

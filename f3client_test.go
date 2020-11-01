@@ -2,7 +2,6 @@ package form3
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cucumber/godog"
@@ -17,17 +16,19 @@ func init() {
 	os.Setenv("F3MaxRetries", "3")
 }
 
-var validAccount = NewAccountBuilder().
-	WithCountry(Countries["GB"]).
-	WithBankId("000006").
-	WithBic("NWBKGB22").
-	WithBankIdCode("GBDSC").
-	WithAccountClassification("Personal")
+func validAccount(f3Client *F3Client) AccountBuilder {
+	return f3Client.Create().
+		WithCountry(Countries["GB"]).
+		WithBankId("000006").
+		WithBic("NWBKGB22").
+		WithBankIdCode("GBDSC").
+		WithAccountClassification("Personal")
+}
 
 type f3ClientState struct {
 	F3Client       *F3Client
 	organisationId UUID
-	accountId	   UUID
+	accountId      UUID
 	payload        *Payload
 	errors         []error
 }
@@ -65,9 +66,9 @@ func (state *f3ClientState) anOrganisationIdOf(orgId string) error {
 }
 
 func (state *f3ClientState) iSendRequestTo(method string, path string, accounts *messages.PickleStepArgument_PickleTable) error {
-	builder := NewAccountBuilder()
-	builder = builder.WithAccountId(state.accountId)
-	builder = builder.WithOrganisationId(state.organisationId)
+	builder := state.F3Client.Create().
+		WithAccountId(state.accountId).
+		WithOrganisationId(state.organisationId)
 
 	for i := 1; i < len(accounts.Rows); i++ {
 		key := accounts.Rows[i].Cells[0].Value
@@ -99,11 +100,16 @@ func (state *f3ClientState) iSendRequestTo(method string, path string, accounts 
 		}
 	}
 
-	reqPayload := builder.RawBuild()
-	resPayload, err := state.F3Client.CreateAccount(context.Background(), reqPayload)
-	state.payload = resPayload
+	response := make(chan *Payload, 1)
+	errors := make(chan []error, 1)
+
+	builder.UnsafeRequest(context.Background(), response, errors)
+
+	err := <-errors
+	state.payload = <-response
+
 	if err != nil {
-		state.errors = []error{err}
+		state.errors = err
 	}
 
 	return nil
@@ -159,16 +165,20 @@ func (state *f3ClientState) aRandomAccountId() error {
 }
 
 func (state *f3ClientState) aValidAccountHasBeenRegistered() error {
-	builder := validAccount.WithOrganisationId(state.organisationId)
-	builder = builder.WithAccountId(state.accountId)
+	response := make(chan *Payload, 1)
+	errors := make(chan []error, 1)
 
-	payload, err := state.F3Client.CreateAccount(context.Background(), builder.RawBuild())
-	state.payload = payload
+	validAccount(state.F3Client).
+		WithOrganisationId(state.organisationId).
+		WithAccountId(state.accountId).
+		UnsafeRequest(context.Background(), response, errors)
+
+	err := <-errors
+	state.payload = <-response
+
 	if err != nil {
-		return err
+		return fmt.Errorf("multiple errors encountered during request %+v", err)
 	}
-	json, _ := json.MarshalIndent(payload, "", "  ")
-	Logger.Printf("%s", string(json))
 
 	return nil
 }
@@ -183,13 +193,16 @@ func (state *f3ClientState) anInvalidAccountId() error {
 	return nil
 }
 
-
 func (state *f3ClientState) iSendRequestToWithTheAccountId(arg1, arg2 string) error {
-	payload, err := state.F3Client.FetchAccount(context.Background(), state.accountId)
-	state.payload = payload
-	if err != nil {
-		state.errors = []error{err}
-	}
+	response := make(chan *Payload, 1)
+	errors := make(chan []error, 1)
+
+	state.F3Client.Fetch().
+		WithAccountId(state.accountId).
+		UnsafeRequest(context.Background(), response, errors)
+
+	state.errors = <-errors
+	state.payload = <-response
 
 	return nil
 }
