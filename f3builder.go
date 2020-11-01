@@ -4,7 +4,7 @@ const (
 	ACCOUNTTYPE = "accounts"
 )
 
-func build(u accountBuilder) *Payload {
+func build(u createBuilder) *Payload {
 	return &Payload{
 		Data: Data{
 			Id:             u.AccountId,
@@ -32,19 +32,37 @@ func build(u accountBuilder) *Payload {
 	}
 }
 
-func logError(err error, response chan<- *Payload, errors chan<- []error) {
+func logPayloadError(err error, response chan<- *Payload, errors chan<- []error) {
 	close(response)
 	errors <- []error { err }
 	close(errors)
 }
 
-func logErrors(err []error, response chan<- *Payload, errors chan<- []error) {
+func logPayloadErrors(err []error, response chan<- *Payload, errors chan<- []error) {
 	close(response)
 	errors <- err
 	close(errors)
 }
 
-func logResponse(payload *Payload, response chan<- *Payload, errors chan<- []error) {
+func logPayloadResponse(payload *Payload, response chan<- *Payload, errors chan<- []error) {
+	close(errors)
+	response <- payload
+	close(response)
+}
+
+func logPaginatedError(err error, response chan<- *PaginatedPayload, errors chan<- []error) {
+	close(response)
+	errors <- []error { err }
+	close(errors)
+}
+
+func logPaginatedErrors(err []error, response chan<- *PaginatedPayload, errors chan<- []error) {
+	close(response)
+	errors <- err
+	close(errors)
+}
+
+func logPaginatedResponse(payload *PaginatedPayload, response chan<- *PaginatedPayload, errors chan<- []error) {
 	close(errors)
 	response <- payload
 	close(response)

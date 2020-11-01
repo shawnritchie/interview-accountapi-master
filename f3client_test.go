@@ -16,7 +16,7 @@ func init() {
 	os.Setenv("F3MaxRetries", "3")
 }
 
-func validAccount(f3Client *F3Client) AccountBuilder {
+func validAccount(f3Client *F3Client) CreateBuilder {
 	return f3Client.Create().
 		WithCountry(Countries["GB"]).
 		WithBankId("000006").
@@ -26,11 +26,13 @@ func validAccount(f3Client *F3Client) AccountBuilder {
 }
 
 type f3ClientState struct {
-	F3Client       *F3Client
-	organisationId UUID
-	accountId      UUID
-	payload        *Payload
-	errors         []error
+	F3Client         *F3Client
+	Paginator        Paginator
+	organisationId   UUID
+	accountId        UUID
+	payload          *Payload
+	PaginatedPayload *PaginatedPayload
+	errors           []error
 }
 
 func (state *f3ClientState) anInitiatedClient() error {
@@ -116,23 +118,15 @@ func (state *f3ClientState) iSendRequestTo(method string, path string, accounts 
 }
 
 func (state *f3ClientState) responseShouldContainAnAccountNumber() error {
-	if att, ok := state.payload.Data.Attributes.(*AccountAttributes); !ok {
-		return fmt.Errorf("error extracting attributes from payload")
-	} else {
-		if att.AccountNumber == "" {
-			return fmt.Errorf("expecting account numer to be generated from %q", state.F3Client.Env.F3BaseURL)
-		}
+	if state.payload.Data.Attributes.AccountNumber == "" {
+		return fmt.Errorf("expecting account numer to be generated from %q", state.F3Client.Env.F3BaseURL)
 	}
 	return nil
 }
 
 func (state *f3ClientState) responseShouldContainAnIBANNumber() error {
-	if att, ok := state.payload.Data.Attributes.(*AccountAttributes); !ok {
-		return fmt.Errorf("error extracting attributes from payload")
-	} else {
-		if att.Iban.IsZeroValue() {
-			return fmt.Errorf("expecting iban to be generated from %q", state.F3Client.Env.F3BaseURL)
-		}
+	if state.payload.Data.Attributes.Iban.IsZeroValue() {
+		return fmt.Errorf("expecting iban to be generated from %q", state.F3Client.Env.F3BaseURL)
 	}
 	return nil
 }
@@ -223,6 +217,34 @@ func (state *f3ClientState) weExpectAHttpStatusCodeNotFound() error {
 	return nil
 }
 
+func (state *f3ClientState) iSendRequestToForPageWithAPageSizeOf(method, path string, page, size int) error {
+	response := make(chan *PaginatedPayload, 1)
+	errors := make(chan []error, 1)
+
+	state.Paginator = state.F3Client.
+							List().
+							WithPage(page).
+							WithPageSize(size).
+							Request(context.Background(), response, errors)
+
+	state.errors = <-errors
+	state.PaginatedPayload = <-response
+
+	return nil
+}
+
+func (state *f3ClientState) iNavigateToTheNextPage() error {
+	response := make(chan *PaginatedPayload, 1)
+	errors := make(chan []error, 1)
+
+	state.Paginator = state.Paginator.Next(context.Background(), response, errors)
+
+	state.errors = <-errors
+	state.PaginatedPayload = <-response
+
+	return nil
+}
+
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	state := &f3ClientState{}
 
@@ -231,6 +253,8 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 		state.accountId = ""
 		state.payload = nil
 		state.errors = nil
+		state.Paginator = nil
+		state.PaginatedPayload = nil
 	})
 
 	ctx.Step(`^an initiated Client$`, state.anInitiatedClient)
@@ -252,4 +276,6 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we expect a http status code: Not Found$`, state.weExpectAHttpStatusCodeNotFound)
 	ctx.Step(`^a random accountId$`, state.aRandomAccountId)
 	ctx.Step(`^a random organisationId$`, state.aRandomOrganisationId)
+	ctx.Step(`^I send "([^"]*)" request to "([^"]*)" for page (\d+) with a page size of (\d+)$`, state.iSendRequestToForPageWithAPageSizeOf)
+	ctx.Step(`^I navigate to the next page$`, state.iNavigateToTheNextPage)
 }

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-type accountBuilder struct {
+type createBuilder struct {
 	AccountAttributes
 	client *F3Client
 	OrganisationId UUID
@@ -16,43 +16,43 @@ type accountBuilder struct {
 	AccountId UUID
 }
 
-type AccountBuilder interface {
-	WithCountry(country Country) AccountBuilder
-	WithBaseCurrency(currency Currency) AccountBuilder
-	WithBankId(bankId BankId) AccountBuilder
-	WithBankIdCode(bankIdCode string) AccountBuilder
-	WithAccountNumber(accountNumber string) AccountBuilder
-	WithBic(bic SwiftCode) AccountBuilder
-	WithIban(iban IBAN) AccountBuilder
-	WithCustomerId(customerId string) AccountBuilder
-	WithName(name Identifier) AccountBuilder
-	WithAlternativeNames(alternativeName Identifier) AccountBuilder
-	WithAccountClassification(classification Classification) AccountBuilder
-	WithJointAccount(jointAccount bool) AccountBuilder
-	WithAccountMatchingOptOut(optOut bool) AccountBuilder
-	WithSecondaryIdentification(identifier Identifier) AccountBuilder
-	WithSwitched(switched bool) AccountBuilder
-	WithStatus(status Status) AccountBuilder
-	WithOrganisationId(organisationId UUID) AccountBuilder
-	WithAccountId(accountId UUID) AccountBuilder
-	UnsafeRequest(ctx context.Context, response chan<- *Payload, errors chan<- []error) AccountBuilder
-	Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) AccountBuilder
-	Validate(errors chan<- []error) AccountBuilder
+type CreateBuilder interface {
+	WithCountry(country Country) CreateBuilder
+	WithBaseCurrency(currency Currency) CreateBuilder
+	WithBankId(bankId BankId) CreateBuilder
+	WithBankIdCode(bankIdCode string) CreateBuilder
+	WithAccountNumber(accountNumber string) CreateBuilder
+	WithBic(bic SwiftCode) CreateBuilder
+	WithIban(iban IBAN) CreateBuilder
+	WithCustomerId(customerId string) CreateBuilder
+	WithName(name Identifier) CreateBuilder
+	WithAlternativeNames(alternativeName Identifier) CreateBuilder
+	WithAccountClassification(classification Classification) CreateBuilder
+	WithJointAccount(jointAccount bool) CreateBuilder
+	WithAccountMatchingOptOut(optOut bool) CreateBuilder
+	WithSecondaryIdentification(identifier Identifier) CreateBuilder
+	WithSwitched(switched bool) CreateBuilder
+	WithStatus(status Status) CreateBuilder
+	WithOrganisationId(organisationId UUID) CreateBuilder
+	WithAccountId(accountId UUID) CreateBuilder
+	UnsafeRequest(ctx context.Context, response chan<- *Payload, errors chan<- []error) CreateBuilder
+	Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) CreateBuilder
+	Validate(errors chan<- []error) CreateBuilder
 }
 
-func newAccountBuilder(client *F3Client) AccountBuilder {
-	return accountBuilder{
+func newAccountBuilder(client *F3Client) CreateBuilder {
+	return createBuilder{
 		client: client,
 		Type: ACCOUNTTYPE,
 	}
 }
 
-func (ab accountBuilder) UnsafeRequest(ctx context.Context, response chan<- *Payload, errors chan<- []error) AccountBuilder {
+func (ab createBuilder) UnsafeRequest(ctx context.Context, response chan<- *Payload, errors chan<- []error) CreateBuilder {
 	go ab.internalRequest(build(ab), ctx, response, errors)
 	return ab
 }
 
-func (ab accountBuilder) Validate(errors chan<- []error) AccountBuilder {
+func (ab createBuilder) Validate(errors chan<- []error) CreateBuilder {
 	if err := postValidators(ab); err != nil && len(err) > 0 {
 		errors <- err
 	}
@@ -60,9 +60,9 @@ func (ab accountBuilder) Validate(errors chan<- []error) AccountBuilder {
 	return ab
 }
 
-func (ab accountBuilder) Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) AccountBuilder {
+func (ab createBuilder) Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) CreateBuilder {
 	if err := postValidators(ab); err != nil && len(err) > 0 {
-		logErrors(err, response, errors)
+		logPayloadErrors(err, response, errors)
 	} else {
 		go ab.internalRequest(build(ab), ctx, response, errors)
 	}
@@ -70,11 +70,11 @@ func (ab accountBuilder) Request(ctx context.Context, response chan<- *Payload, 
 	return ab
 }
 
-func (ab accountBuilder) internalRequest(reqPayload * Payload, ctx context.Context, response chan<- *Payload, errors chan<- []error) {
+func (ab createBuilder) internalRequest(reqPayload * Payload, ctx context.Context, response chan<- *Payload, errors chan<- []error) {
 	byteArray, err := json.Marshal(reqPayload)
 	if err != nil {
 		Logger.Println("error marshalling json payload for account creation")
-		logError(fmt.Errorf("error marshalling payload: %+v - error: %w", reqPayload, err), response, errors)
+		logPayloadError(fmt.Errorf("error marshalling payload: %+v - error: %w", reqPayload, err), response, errors)
 		return
 	}
 
@@ -82,110 +82,109 @@ func (ab accountBuilder) internalRequest(reqPayload * Payload, ctx context.Conte
 	req, err := http.NewRequest("POST", url, bytes.NewReader(byteArray))
 	if err != nil {
 		Logger.Printf("failed to creat new http request for %q", url)
-		logError(fmt.Errorf("error creating request Method: 'Post' Url: %q - error: %w", url, err), response, errors)
+		logPayloadError(fmt.Errorf("error creating request Method: 'Post' Url: %q - error: %w", url, err), response, errors)
 		return
 	}
 
 	req = req.WithContext(ctx)
-	att := &AccountAttributes{}
-	res, err := ab.client.request(req, att)
-	if err != nil {
+	res := &Payload{}
+	if err := ab.client.request(req, res); err != nil {
 		Logger.Printf("error requesting POST %q", url)
-		logError(err, response, errors)
+		logPayloadError(err, response, errors)
 		return
 	}
 
-	logResponse(res, response, errors)
+	logPayloadResponse(res, response, errors)
 }
 
 
 
-func (ab accountBuilder) WithCountry(country Country) AccountBuilder {
+func (ab createBuilder) WithCountry(country Country) CreateBuilder {
 	ab.Country = country
 	return ab
 }
 
-func (ab accountBuilder) WithBaseCurrency(currency Currency) AccountBuilder {
+func (ab createBuilder) WithBaseCurrency(currency Currency) CreateBuilder {
 	ab.BaseCurrency = currency
 	return ab
 }
 
-func (ab accountBuilder) WithBankId(bankId BankId) AccountBuilder {
+func (ab createBuilder) WithBankId(bankId BankId) CreateBuilder {
 	ab.BankId = bankId
 	return ab
 }
 
-func (ab accountBuilder) WithBankIdCode(bankIdCode string) AccountBuilder {
+func (ab createBuilder) WithBankIdCode(bankIdCode string) CreateBuilder {
 	ab.BankIdCode = bankIdCode
 	return ab
 }
 
-func (ab accountBuilder) WithAccountNumber(accountNumber string) AccountBuilder {
+func (ab createBuilder) WithAccountNumber(accountNumber string) CreateBuilder {
 	ab.AccountNumber = accountNumber
 	return ab
 }
 
-func (ab accountBuilder) WithBic(bic SwiftCode) AccountBuilder {
+func (ab createBuilder) WithBic(bic SwiftCode) CreateBuilder {
 	ab.Bic = bic
 	return ab
 }
 
-func (ab accountBuilder) WithIban(iban IBAN) AccountBuilder {
+func (ab createBuilder) WithIban(iban IBAN) CreateBuilder {
 	ab.Iban = iban
 	return ab
 }
 
-func (ab accountBuilder) WithCustomerId(customerId string) AccountBuilder {
+func (ab createBuilder) WithCustomerId(customerId string) CreateBuilder {
 	ab.CustomerId = customerId
 	return ab
 }
 
-func (ab accountBuilder) WithName(name Identifier) AccountBuilder {
+func (ab createBuilder) WithName(name Identifier) CreateBuilder {
 	ab.Name = append(ab.Name, name)
 	return ab
 }
 
-func (ab accountBuilder) WithAlternativeNames(name Identifier) AccountBuilder {
+func (ab createBuilder) WithAlternativeNames(name Identifier) CreateBuilder {
 	ab.AlternativeNames = append(ab.AlternativeNames, name)
 	return ab
 }
 
-func (ab accountBuilder) WithAccountClassification(classification Classification) AccountBuilder {
+func (ab createBuilder) WithAccountClassification(classification Classification) CreateBuilder {
 	ab.AccountClassification = classification
 	return ab
 }
 
-func (ab accountBuilder) WithJointAccount(jointAccount bool) AccountBuilder {
+func (ab createBuilder) WithJointAccount(jointAccount bool) CreateBuilder {
 	ab.JointAccount = jointAccount
 	return ab
 }
 
-func (ab accountBuilder) WithAccountMatchingOptOut(optOut bool) AccountBuilder {
+func (ab createBuilder) WithAccountMatchingOptOut(optOut bool) CreateBuilder {
 	ab.AccountMatchingOptOut = optOut
 	return ab
 }
 
-func (ab accountBuilder) WithSecondaryIdentification(identifier Identifier) AccountBuilder {
+func (ab createBuilder) WithSecondaryIdentification(identifier Identifier) CreateBuilder {
 	ab.SecondaryIdentification = identifier
 	return ab
 }
 
-func (ab accountBuilder) WithSwitched(switched bool) AccountBuilder {
+func (ab createBuilder) WithSwitched(switched bool) CreateBuilder {
 	ab.Switched = switched
 	return ab
 }
 
-func (ab accountBuilder) WithStatus(status Status) AccountBuilder {
+func (ab createBuilder) WithStatus(status Status) CreateBuilder {
 	ab.Status = status
 	return ab
 }
 
-func (ab accountBuilder) WithOrganisationId(organisationId UUID) AccountBuilder {
+func (ab createBuilder) WithOrganisationId(organisationId UUID) CreateBuilder {
 	ab.OrganisationId = organisationId
 	return ab
 }
 
-func (ab accountBuilder) WithAccountId(accountId UUID) AccountBuilder {
+func (ab createBuilder) WithAccountId(accountId UUID) CreateBuilder {
 	ab.AccountId = accountId
 	return ab
 }

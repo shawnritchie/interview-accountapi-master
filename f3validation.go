@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-type Validator func(accountBuilder) []error
+type Validator func(createBuilder) []error
 type BuilderConstraint Validator
 
 var accountIdFieldMissing = missingFieldError("id")
@@ -18,10 +18,10 @@ var TooManyNames = errors.New("names array is restricted to a maximum string[4]"
 var TooManyAlternativeNames = errors.New("alternative names array is restricted to a maximum string[3]")
 
 func missingFieldError(field string) error {
-	return fmt.Errorf("%q field required inside of AccountBuilder", field)
+	return fmt.Errorf("%q field required inside of CreateBuilder", field)
 }
 
-func postValidators(ab accountBuilder) []error {
+func postValidators(ab createBuilder) []error {
 	switch ab.Country {
 	case "GB":
 		return composeValidators(validateSetFields, validateRequiredFields, bankIdValidator, bicValidator,
@@ -76,7 +76,7 @@ func postValidators(ab accountBuilder) []error {
 	}
 }
 
-func emptyIbanValidator(ab accountBuilder) (errors []error) {
+func emptyIbanValidator(ab createBuilder) (errors []error) {
 	if ab.Iban != "" {
 		errors = append(errors, fmt.Errorf("iban should be empty"))
 	}
@@ -84,7 +84,7 @@ func emptyIbanValidator(ab accountBuilder) (errors []error) {
 }
 
 func composeValidators(validators ...Validator) Validator {
-	f := func(ab accountBuilder) (errors []error) {
+	f := func(ab createBuilder) (errors []error) {
 		for _, fx := range validators {
 			if err := fx(ab); err != nil {
 				errors = append(errors, err...)
@@ -95,7 +95,7 @@ func composeValidators(validators ...Validator) Validator {
 	return f
 }
 
-func validateSetFields(ab accountBuilder) (errors []error) {
+func validateSetFields(ab createBuilder) (errors []error) {
 	if err := ab.Country.IsValid(); !ab.Country.IsZeroValue() && err != nil {
 		errors = append(errors, err)
 	}
@@ -139,7 +139,7 @@ func validateSetFields(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func nameValidator(ab accountBuilder) (errors []error) {
+func nameValidator(ab createBuilder) (errors []error) {
 	if l := len(ab.Name); l > 4 {
 		errors = append(errors, TooManyNames)
 	}
@@ -153,7 +153,7 @@ func nameValidator(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func alternativeNameValidator(ab accountBuilder) (errors []error) {
+func alternativeNameValidator(ab createBuilder) (errors []error) {
 	if l := len(ab.AlternativeNames); l > 3 {
 		errors = append(errors, TooManyNames)
 	}
@@ -167,7 +167,7 @@ func alternativeNameValidator(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func bicValidator(ab accountBuilder) (errors []error) {
+func bicValidator(ab createBuilder) (errors []error) {
 	if ab.Bic.IsZeroValue() {
 		errors = append(errors, bicFieldMissing)
 	}
@@ -179,7 +179,7 @@ func bicValidator(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func bankIdValidator(ab accountBuilder) (errors []error) {
+func bankIdValidator(ab createBuilder) (errors []error) {
 	if validator, ok := bankIdValidationMap[ab.Country]; ok {
 		for _, err := range stringValidator(string(ab.BankId), validator) {
 			errors = append(errors, fmt.Errorf("invalid 'BankId', error: %w", err))
@@ -191,7 +191,7 @@ func bankIdValidator(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func accountNumberValidator(ab accountBuilder) (errors []error) {
+func accountNumberValidator(ab createBuilder) (errors []error) {
 	if validator, ok := accountNumberLengthMap[ab.Country]; ok {
 		for _, err := range stringValidator(string(ab.AccountNumber), validator) {
 			errors = append(errors, fmt.Errorf("invalid 'Account Number', error: %w", err))
@@ -225,7 +225,7 @@ func stringValidator(data string, validator stringValidation) (errors []error) {
 	return errors
 }
 
-func bankIdCodeValidator(ab accountBuilder) (errors []error) {
+func bankIdCodeValidator(ab createBuilder) (errors []error) {
 	if expectedCodes, ok := BankIdCodes[ab.Country]; ok {
 		if ab.BankIdCode != expectedCodes {
 			errors = append(errors, fmt.Errorf("invalid bank id code: %q for country %q should be %q", ab.BankIdCode, ab.Country, expectedCodes))
@@ -234,7 +234,7 @@ func bankIdCodeValidator(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func italyValidator(ab accountBuilder) (errors []error) {
+func italyValidator(ab createBuilder) (errors []error) {
 	if ab.AccountNumber == "" && len(ab.BankId) != 10 {
 		errors = append(errors, fmt.Errorf("invalid Italian Bank Id %q. seeing no account number is submited length should be 10 characters", ab.BankId))
 	}
@@ -246,7 +246,7 @@ func italyValidator(ab accountBuilder) (errors []error) {
 	return errors
 }
 
-func validateRequiredFields(ab accountBuilder) (errors []error) {
+func validateRequiredFields(ab createBuilder) (errors []error) {
 	if ab.Country.IsZeroValue() {
 		errors = append(errors, countryFieldMissing)
 	} else if err := ab.Country.IsValid(); err != nil {

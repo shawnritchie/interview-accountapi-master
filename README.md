@@ -145,6 +145,7 @@ Improvements
 - Client current client method with an asynch version which returns a channel and runs the http & json deserialization asynchronously
 
 
+Clients Specs 
 F3Client
     .Create()
     .WithX()
@@ -154,6 +155,12 @@ F3Client
     
 F3Client
     .Fetch()
+    .WithX()
+    .UnsafeRequest(context, response, errors)
+    .Request(context, response, errors)
+    
+F3Client
+    .Delete()
     .WithX()
     .UnsafeRequest(context, response, errors)
     .Request(context, response, errors)

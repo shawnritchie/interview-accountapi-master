@@ -46,7 +46,7 @@ func (fb fetchBuilder) Validate(errors chan<- []error) FetchBuilder {
 
 func (fb fetchBuilder) Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) FetchBuilder {
 	if err := fb.validate(); err != nil && len(err) > 0 {
-		logErrors(err, response, errors)
+		logPayloadErrors(err, response, errors)
 		return fb
 	} else {
 		go fb.internalRequest(fb.AccountId, ctx, response, errors)
@@ -69,28 +69,21 @@ func (fb fetchBuilder) validate() (errors []error) {
 }
 
 func (fb fetchBuilder) internalRequest(accountId UUID, ctx context.Context, response chan<- *Payload, errors chan<- []error) {
-	if err := accountId.IsValid(); err != nil {
-		Logger.Printf("UUID validation failed UUID: %s", accountId)
-		logError(fmt.Errorf("invalid account id: %q. %w", accountId, err), response, errors)
-		return
-	}
-
 	url := fmt.Sprintf("http://%s/v1/organisation/accounts/%s", fb.client.Env.F3BaseURL, url.QueryEscape(string(accountId)))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		Logger.Printf("failed to creat new http request for %q", url)
-		logError(fmt.Errorf("error creating request Method: 'GET' Url: %q - error: %w", url, err), response, errors)
+		logPayloadError(fmt.Errorf("error creating request Method: 'GET' Url: %q - error: %w", url, err), response, errors)
 		return
 	}
 
 	req = req.WithContext(ctx)
-	att := &AccountAttributes{}
-	res, err := fb.client.request(req, att)
-	if err != nil {
+	res := &Payload{}
+	if err := fb.client.request(req, res); err != nil {
 		Logger.Printf("error requesting GET %q", url)
-		logError(err, response, errors)
+		logPayloadError(err, response, errors)
 		return
 	}
 
-	logResponse(res, response, errors)
+	logPayloadResponse(res, response, errors)
 }
