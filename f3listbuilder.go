@@ -59,8 +59,7 @@ func (l listBuilder) Validate(errors chan<- []error) ListBuilder {
 
 func (l listBuilder) UnsafeRequest(ctx context.Context, response chan<- *PaginatedPayload, errors chan<- []error) Paginator {
 	url := fmt.Sprintf("http://%s/v1/organisation/accounts?page%%5Bnumber%%5D=%d&page%%5Bsize%%5D]=%d", l.client.Env.F3BaseURL, l.Page, l.PageSize)
-	l.internalRequest(url, ctx, response, errors)
-	return l
+	return l.internalRequest(url, ctx, response, errors)
 }
 
 func (l listBuilder) Request(ctx context.Context, response chan<- *PaginatedPayload, errors chan<- []error) Paginator {
@@ -71,8 +70,7 @@ func (l listBuilder) Request(ctx context.Context, response chan<- *PaginatedPayl
 	} else {
 		url := fmt.Sprintf("http://%s/v1/organisation/accounts?page%%5Bnumber%%5D=%d&page%%5Bsize%%5D]=%d", l.client.Env.F3BaseURL, l.Page, l.PageSize)
 		Logger.Printf("URL: %s", url)
-		l.internalRequest(url, ctx, response, errors)
-		return l
+		return l.internalRequest(url, ctx, response, errors)
 	}
 }
 
@@ -163,12 +161,12 @@ func (l listBuilder) validate() (errors []error) {
 	return errors
 }
 
-func (l listBuilder) internalRequest(url string, ctx context.Context, response chan<- *PaginatedPayload, errors chan<- []error) {
+func (l listBuilder) internalRequest(url string, ctx context.Context, response chan<- *PaginatedPayload, errors chan<- []error) listBuilder {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		Logger.Printf("failed to fetch request for %q", url)
 		logPaginatedError(fmt.Errorf("error creating request Method: 'GET' Url: %q - error: %w", url, err), response, errors)
-		return
+		return l
 	}
 
 	req = req.WithContext(ctx)
@@ -176,9 +174,10 @@ func (l listBuilder) internalRequest(url string, ctx context.Context, response c
 	if err := l.client.request(req, res); err != nil {
 		Logger.Printf("error requesting GET %q", url)
 		logPaginatedError(err, response, errors)
-		return
+		return l
 	}
 	l.response = res
 
 	logPaginatedResponse(res, response, errors)
+	return l
 }

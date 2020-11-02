@@ -245,6 +245,55 @@ func (state *f3ClientState) iNavigateToTheNextPage() error {
 	return nil
 }
 
+func (state *f3ClientState) iNavigateToThePreviousPage() error {
+	response := make(chan *PaginatedPayload, 1)
+	errors := make(chan []error, 1)
+
+	state.Paginator = state.Paginator.Prev(context.Background(), response, errors)
+
+	state.errors = <-errors
+	state.PaginatedPayload = <-response
+
+	return nil
+}
+
+func (state *f3ClientState) iNavigateToTheFirstPage() error {
+	response := make(chan *PaginatedPayload, 1)
+	errors := make(chan []error, 1)
+
+	state.Paginator = state.Paginator.First(context.Background(), response, errors)
+
+	state.errors = <-errors
+	state.PaginatedPayload = <-response
+
+	return nil
+}
+
+func (state *f3ClientState) iNavigateToTheLastPage() error {
+	response := make(chan *PaginatedPayload, 1)
+	errors := make(chan []error, 1)
+
+	state.Paginator = state.Paginator.Last(context.Background(), response, errors)
+
+	state.errors = <-errors
+	state.PaginatedPayload = <-response
+
+	return nil
+}
+
+func (state *f3ClientState) aPageSizeOf(pageSize int) error {
+	if state.PaginatedPayload == nil {
+		return fmt.Errorf("no list response found we were expecting a response containing a list of accounts")
+	}
+
+	if len(state.PaginatedPayload.Data) != pageSize {
+		return fmt.Errorf("list response contained a total of %d accounts. we expected %d accounts with the specified page size",
+			len(state.PaginatedPayload.Data), pageSize)
+	}
+
+	return nil
+}
+
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	state := &f3ClientState{}
 
@@ -278,4 +327,8 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a random organisationId$`, state.aRandomOrganisationId)
 	ctx.Step(`^I send "([^"]*)" request to "([^"]*)" for page (\d+) with a page size of (\d+)$`, state.iSendRequestToForPageWithAPageSizeOf)
 	ctx.Step(`^I navigate to the next page$`, state.iNavigateToTheNextPage)
+	ctx.Step(`^I navigate to the previous page$`, state.iNavigateToThePreviousPage)
+	ctx.Step(`^I navigate to the first page$`, state.iNavigateToTheFirstPage)
+	ctx.Step(`^I navigate to the last page$`, state.iNavigateToTheLastPage)
+	ctx.Step(`^a page size of (\d+)$`, state.aPageSizeOf)
 }

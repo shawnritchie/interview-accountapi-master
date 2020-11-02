@@ -139,6 +139,8 @@ Create
 4. No validation mapping the country requirements specified in the documentation highlight in the cucumber test
 5. The response is a mirror of the request parameters which does not match the specifications
 6. The fetch API has no UUID validation on the ID field inside of the payload
+7. The List API ignores the page size parameter and constantly return 1000 records
+
 
 Improvements
 - Validation of host environmental variable to make sure it matches the library expectations
