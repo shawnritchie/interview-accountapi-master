@@ -48,7 +48,7 @@ func (l listBuilder) WithPageSize(pageSize int) ListBuilder {
 }
 
 func (l listBuilder) Validate(errors chan<- []error) ListBuilder {
-	if err := l.validate(); err != nil && len(err) > 0 {
+	if err := l.validate(); len(err) > 0 {
 		errors <- err
 		close(errors)
 		return l
@@ -63,7 +63,7 @@ func (l listBuilder) UnsafeRequest(ctx context.Context, response chan<- *Paginat
 }
 
 func (l listBuilder) Request(ctx context.Context, response chan<- *PaginatedPayload, errors chan<- []error) Paginator {
-	if err := l.validate(); err != nil && len(err) > 0 {
+	if err := l.validate(); len(err) > 0 {
 		errors <- err
 		close(errors)
 		return l
@@ -180,4 +180,16 @@ func (l listBuilder) internalRequest(url string, ctx context.Context, response c
 
 	logPaginatedResponse(res, response, errors)
 	return l
+}
+
+func logPaginatedError(err error, response chan<- *PaginatedPayload, errors chan<- []error) {
+	close(response)
+	errors <- []error { err }
+	close(errors)
+}
+
+func logPaginatedResponse(payload *PaginatedPayload, response chan<- *PaginatedPayload, errors chan<- []error) {
+	close(errors)
+	response <- payload
+	close(response)
 }

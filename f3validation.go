@@ -12,7 +12,6 @@ type BuilderConstraint Validator
 var accountIdFieldMissing = missingFieldError("id")
 var countryFieldMissing = missingFieldError("country")
 var bicFieldMissing = missingFieldError("bic")
-var bankIdFieldMissing = missingFieldError("bank_id")
 var classificationFieldMissing = missingFieldError("account_classification")
 var TooManyNames = errors.New("names array is restricted to a maximum string[4]")
 var TooManyAlternativeNames = errors.New("alternative names array is restricted to a maximum string[3]")

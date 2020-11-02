@@ -1,9 +1,46 @@
-# About me
-I m Shawn and have been programming for way too long, to the degree that I feel that it is part of my identity. I love everything tech, I listen podcast weekly, read technical books, I use to attend conferences prior the pandemic, trying out new technologies!
+# Form3 Take Home Exercise
 
-Prior to this code challenge the last time I wrote go was around 3-4 years ago were I tried the language with some super simple examples to try out the concurrency model. In my regular day to day I am usually found coding in Java/Kotlin.
+## Instructions
+The goal of this exercise is to write a client library 
+in Go to access our fake [account API](http://api-docs.form3.tech/api.html#organisation-accounts) service. 
 
-Overall I really enjoyed the challenge and got a better feel of the go language, and its unique traits.
+### Should
+- Client library should be written in Go
+- Document your technical decisions
+- Implement the `Create`, `Fetch`, `List` and `Delete` operations on the `accounts` resource. Note that filtering of the List operation is not required, but you should support paging
+- Ensure your solution is well tested to the level you would expect in a commercial environment. Make sure your tests are easy to read.
+- To keep this exercise simple, fields `data.attributes.private_identification`, `data.attributes.organisation_identification` 
+and `data.relationships` were omitted in the provided fake accountapi implementation - do not implement these in your model
+- If you encounter any problems running the fake accountapi we would encourage you to do some debugging first, 
+before reaching out for help
+
+#### Docker-compose
+ - Add your solution to the provided docker-compose file
+ - We should be able to run `docker-compose up` and see your tests run against the provided account API service 
+
+### Please don't
+- Use a code generator to write the client library
+- Use a library for your client (e.g: go-resty). Only test libraries are allowed.
+- Implement an authentication scheme
+
+## How to submit your exercise
+- Include your name in the README. If you are new to Go, please also mention this in the README so that we can consider this when reviewing your exercise
+- Create a private [GitHub](https://help.github.com/en/articles/create-a-repo) repository, copy the `docker-compose` from this repository
+- [Invite](https://help.github.com/en/articles/inviting-collaborators-to-a-personal-repository) @form3tech-interviewer-1 to your private repo
+- Let us know you've completed the exercise using the link provided at the bottom of the email from our recruitment team
+
+## License
+Copyright 2019-2020 Form3 Financial Cloud
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+
+## About me
 
 ## Architectural Decisions
 
@@ -97,7 +134,6 @@ Test proving the issues have been provided but have been commited out to make su
 - Research more indepth the use of channels in the context of how the client API has been designed seeing the current 
 design makes use of one time use channel seeing it closes the channel once the results are posted.
 - Test for race conditions / potential deadlock in the builders especially the list builder using shared state for page traversal
-- Do further testing especially on the Request method for each of the API as it wasn't tested as extensively as the UnsafeRequest
 
 ## Production Ready TODO
 - [ ] Exponential Backoff https://api-docs.form3.tech/api.html#introduction-and-api-conventions-timeouts-rate-limiting-and-retry-strategy

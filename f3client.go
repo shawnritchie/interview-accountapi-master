@@ -83,26 +83,33 @@ func (c *F3Client) List() ListBuilder {
 	return newListBuilder(c)
 }
 
+func (c *F3Client) Delete() DeleteBuilder {
+	return newDeleteBuilder(c)
+}
+
 func (c *F3Client) request(req *http.Request, body interface{}) error {
 	req.Header.Set("Host", c.Env.F3BaseURL)
 	req.Header.Set("Date", time.Now().Format(time.RFC1123))
 	req.Header.Set("Accept", "application/vnd.api+json")
 
 	res, err := c.HTTPClient.Do(req)
-	defer res.Body.Close()
-
 	if err != nil {
 		Logger.Printf("error fetching request")
 		return err
 	}
+	defer func() {
+		res.Body.Close()
+	}()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		return mapF3Error(res)
 	}
 
-	if err = json.NewDecoder(res.Body).Decode(body); err != nil {
-		Logger.Printf("error decoding response body")
-		return fmt.Errorf("error decoding json body. error: %w", err)
+	if body != nil {
+		if err = json.NewDecoder(res.Body).Decode(body); err != nil {
+			Logger.Printf("error decoding response body")
+			return fmt.Errorf("error decoding json body. error: %w", err)
+		}
 	}
 
 	return nil
@@ -146,12 +153,12 @@ func mapF3Error(res *http.Response) error {
 
 type PaginatedPayload struct {
 	Data  []Data	`json:"data"`
-	Links Links		`json:"links""`
+	Links Links		`json:"links"`
 }
 
 type Payload struct {
 	Data  Data  `json:"data"`
-	Links Links `json:"links""`
+	Links Links `json:"links"`
 }
 
 type Data struct {

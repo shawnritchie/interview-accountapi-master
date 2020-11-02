@@ -53,15 +53,21 @@ func (ab createBuilder) UnsafeRequest(ctx context.Context, response chan<- *Payl
 }
 
 func (ab createBuilder) Validate(errors chan<- []error) CreateBuilder {
-	if err := postValidators(ab); err != nil && len(err) > 0 {
-		errors <- err
+	var errs []error
+	if ab.client == nil {
+		errs = append(errs, fmt.Errorf("F3Client not set"))
 	}
+
+	if err := postValidators(ab); len(err) > 0 {
+		errors <- append(errs, err...)
+	}
+
 	close(errors)
 	return ab
 }
 
 func (ab createBuilder) Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) CreateBuilder {
-	if err := postValidators(ab); err != nil && len(err) > 0 {
+	if err := postValidators(ab); len(err) > 0 {
 		logPayloadErrors(err, response, errors)
 	} else {
 		go ab.internalRequest(build(ab), ctx, response, errors)

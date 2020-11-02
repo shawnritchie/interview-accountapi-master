@@ -49,21 +49,3 @@ func logPayloadResponse(payload *Payload, response chan<- *Payload, errors chan<
 	response <- payload
 	close(response)
 }
-
-func logPaginatedError(err error, response chan<- *PaginatedPayload, errors chan<- []error) {
-	close(response)
-	errors <- []error { err }
-	close(errors)
-}
-
-func logPaginatedErrors(err []error, response chan<- *PaginatedPayload, errors chan<- []error) {
-	close(response)
-	errors <- err
-	close(errors)
-}
-
-func logPaginatedResponse(payload *PaginatedPayload, response chan<- *PaginatedPayload, errors chan<- []error) {
-	close(errors)
-	response <- payload
-	close(response)
-}

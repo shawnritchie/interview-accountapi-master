@@ -8,7 +8,6 @@ import (
 )
 
 type fetchBuilder struct {
-	AccountAttributes
 	client *F3Client
 	AccountId UUID
 }
@@ -32,12 +31,12 @@ func (fb fetchBuilder) WithAccountId(accountId UUID) FetchBuilder {
 }
 
 func (fb fetchBuilder) UnsafeRequest(ctx context.Context, response chan<- *Payload, errors chan<- []error) FetchBuilder {
-	go fb.internalRequest(fb.AccountId, ctx, response, errors)
+	go fb.internalRequest(ctx, response, errors)
 	return fb
 }
 
 func (fb fetchBuilder) Validate(errors chan<- []error) FetchBuilder {
-	if err := fb.validate(); err != nil && len(err) > 0 {
+	if err := fb.validate(); len(err) > 0 {
 		errors <- err
 	}
 	close(errors)
@@ -45,11 +44,11 @@ func (fb fetchBuilder) Validate(errors chan<- []error) FetchBuilder {
 }
 
 func (fb fetchBuilder) Request(ctx context.Context, response chan<- *Payload, errors chan<- []error) FetchBuilder {
-	if err := fb.validate(); err != nil && len(err) > 0 {
+	if err := fb.validate(); len(err) > 0 {
 		logPayloadErrors(err, response, errors)
 		return fb
 	} else {
-		go fb.internalRequest(fb.AccountId, ctx, response, errors)
+		go fb.internalRequest(ctx, response, errors)
 		return fb
 	}
 }
@@ -68,8 +67,8 @@ func (fb fetchBuilder) validate() (errors []error) {
 	return errors
 }
 
-func (fb fetchBuilder) internalRequest(accountId UUID, ctx context.Context, response chan<- *Payload, errors chan<- []error) {
-	url := fmt.Sprintf("http://%s/v1/organisation/accounts/%s", fb.client.Env.F3BaseURL, url.QueryEscape(string(accountId)))
+func (fb fetchBuilder) internalRequest(ctx context.Context, response chan<- *Payload, errors chan<- []error) {
+	url := fmt.Sprintf("http://%s/v1/organisation/accounts/%s", fb.client.Env.F3BaseURL, url.QueryEscape(string(fb.AccountId)))
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		Logger.Printf("failed to creat new http request for %q", url)

@@ -6,7 +6,7 @@ import (
 )
 
 func TestZeroValueCurrency(t *testing.T) {
-	if c, _ := Countries["XX"]; c != zeroValueCountry {
+	if c := Countries["XX"]; c != zeroValueCountry {
 		t.Errorf("non existant country should return zero value")
 	}
 }
