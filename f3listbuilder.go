@@ -101,7 +101,7 @@ func (l listBuilder) Prev(ctx context.Context, response chan<- *PaginatedPayload
 		return l
 	}
 
-	url := fmt.Sprintf("http://%s%s", l.client.Env.F3BaseURL, l.response.Links.Next)
+	url := fmt.Sprintf("http://%s%s", l.client.Env.F3BaseURL, l.response.Links.Prev)
 	l.internalRequest(url, ctx, response, errors)
 	return l
 }
@@ -117,7 +117,7 @@ func (l listBuilder) First(ctx context.Context, response chan<- *PaginatedPayloa
 		return l
 	}
 
-	url := fmt.Sprintf("http://%s%s", l.client.Env.F3BaseURL, l.response.Links.Next)
+	url := fmt.Sprintf("http://%s%s", l.client.Env.F3BaseURL, l.response.Links.First)
 	l.internalRequest(url, ctx, response, errors)
 	return l
 }
@@ -133,7 +133,7 @@ func (l listBuilder) Last(ctx context.Context, response chan<- *PaginatedPayload
 		return l
 	}
 
-	url := fmt.Sprintf("http://%s%s", l.client.Env.F3BaseURL, l.response.Links.Next)
+	url := fmt.Sprintf("http://%s%s", l.client.Env.F3BaseURL, l.response.Links.Last)
 	l.internalRequest(url, ctx, response, errors)
 	return l
 }
