@@ -40,3 +40,13 @@ services:
     environment:
       - SKIP_SETCAP=1
       - VAULT_DEV_ROOT_TOKEN_ID=8fb95528-57c6-422e-9722-d2147bcba8ed
+
+  test:
+    build: .
+    depends_on:
+      - accountapi
+    environment:
+      - F3BaseURL=accountapi:8080
+      - F3Timeout=60s
+      - F3MaxRetries=3
+
