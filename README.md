@@ -1,7 +1,7 @@
 # About me
-I m Shawn and have been programming for way too long, to the degree that I feel that it is part of my identity. I love everything tech, I listen podcast weekly, read technical books, I use to attend conferences prior the pandemic, trying out new technologies!
+I m Shawn and have been programming for way too long, I consider being an engineer as part of my identity hence forth I take it seriously. I love everything tech some habits I started over the years are listening to podcasts, reading technical books, attending conferences prior to the pandemic, trying out new technologies! Other than tech I'm also quite active physically, with the ambition to finish a half ironman triathlon in 2021!
 
-Prior to this code challenge the last time I wrote go was around 3-4 years ago were I tried the language with some super simple examples to try out the concurrency model. In my regular day to day I am usually found coding in Java/Kotlin.
+Prior to this code challenge the last time I wrote go was around 3-4 years ago where I tried the language with some super simple examples trying out the concurrency model. In my regular day to day I am usually found coding in Java/Kotlin.
 
 Overall I really enjoyed the challenge and got a better feel of the go language, and its unique traits.
 
@@ -75,20 +75,20 @@ errcheck .
 The following issues have been found while testing the client against the black box image of the account api.
 Test proving the issues have been provided but have been commited out to make sure the build runs sucessfully.
 
-### Create
+##### Create
 1. No Validation on BankID
 2. No validation on the number of names
 3. No validation on the status field
 4. No validation mapping the country requirements specified in the documentation highlight in the cucumber test
 5. The response is a mirror of the request parameters which does not match the specifications
 
-### Fetch
+##### Fetch
 6. No UUID validation on the ID field inside of the payload
 
-### List
+##### List
 7. Ignores the page size parameter and constantly return 1000 records
 
-### Delete
+##### Delete
 8. Returns a 204 when deleting a non existent an account
 9. Deleting an account with the incorrect version number returns a 404 instead of a 409
 
@@ -98,6 +98,7 @@ Test proving the issues have been provided but have been commited out to make su
 design makes use of one time use channel seeing it closes the channel once the results are posted.
 - Test for race conditions / potential deadlock in the builders especially the list builder using shared state for page traversal
 - Do further testing especially on the Request method for each of the API as it wasn't tested as extensively as the UnsafeRequest
+- Investigate if some validation which currently are throwing runtime exceptions can be handled as compile time errors by diving deeper into the go type system.
 
 ## Production Ready TODO
 - [ ] Exponential Backoff https://api-docs.form3.tech/api.html#introduction-and-api-conventions-timeouts-rate-limiting-and-retry-strategy
@@ -154,9 +155,9 @@ F3Client
     .Last()
 ```    
 
-##Building
-
+##Building / Test Step
+Using docker compose should spawn up a container with the go runtime which will apply all the unit test together with 
+the cucumber tests validating the api and the client library
 ```
-docker build -t shawnritchie/interview-accountapi-master:1.0 .
-docker run shawnritchie/interview-accountapi-master:1.0
+docker-compose up
 ```
