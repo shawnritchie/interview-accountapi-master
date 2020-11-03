@@ -6,7 +6,7 @@ import (
 )
 
 func TestCurrencyValidation(t *testing.T) {
-	currencyCodes := []struct{
+	currencyCodes := []struct {
 		scenario    string
 		currencyStr string
 		expectError bool

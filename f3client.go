@@ -11,14 +11,9 @@ import (
 )
 
 const (
-	CREATE 				= "CREATE"
-	FETCH				= "FETCH"
-	LIST 				= "LIST"
-	DELETE 				= "DELETE"
-
-	F3BaseURL           = "F3BaseURL"
-	F3Timeout           = "F3Timeout"
-	F3MaxRetries        = "F3MaxRetries"
+	F3BaseURL    = "F3BaseURL"
+	F3Timeout    = "F3Timeout"
+	F3MaxRetries = "F3MaxRetries"
 )
 
 type F3Env struct {
@@ -51,6 +46,7 @@ func SetupF3Client(env F3Env) *F3Client {
 func NewF3Client() (*F3Client, error) {
 	clientEnv.F3BaseURL = os.Getenv(F3BaseURL)
 	if clientEnv.F3BaseURL == "" {
+		Logger.Printf("'F3BaseURL' environmental variable not set")
 		return nil, fmt.Errorf("'F3BaseURL' environmental variable not set")
 	}
 
@@ -147,13 +143,13 @@ func mapF3Error(res *http.Response) error {
 	case http.StatusGatewayTimeout:
 		return F3StatusGatewayTimeout
 	default:
-		return fmt.Errorf("status code: %d, unsupported error: %w",res.StatusCode, F3UnsupportedError)
+		return fmt.Errorf("status code: %d, unsupported error: %w", res.StatusCode, F3UnsupportedError)
 	}
 }
 
 type PaginatedPayload struct {
-	Data  []Data	`json:"data"`
-	Links Links		`json:"links"`
+	Data  []Data `json:"data"`
+	Links Links  `json:"links"`
 }
 
 type Payload struct {
@@ -162,17 +158,17 @@ type Payload struct {
 }
 
 type Data struct {
-	Id             UUID       			`json:"id"`
-	OrganisationId UUID       			`json:"organisation_id"`
-	RecordType     string       		`json:"type"`
-	Version        uint32       		`json:"version"`
-	CreateOn       time.Time    		`json:"created_on"`
-	ModifiedOn     time.Time    		`json:"modified_on"`
-	Attributes     AccountAttributes 	`json:"attributes"`
+	Id             UUID              `json:"id"`
+	OrganisationId UUID              `json:"organisation_id"`
+	RecordType     string            `json:"type"`
+	Version        uint32            `json:"version"`
+	CreateOn       time.Time         `json:"created_on"`
+	ModifiedOn     time.Time         `json:"modified_on"`
+	Attributes     AccountAttributes `json:"attributes"`
 }
 
 type Links struct {
-	Self string `json:"self"`
+	Self  string `json:"self"`
 	First string `json:"first"`
 	Last  string `json:"last"`
 	Next  string `json:"next"`

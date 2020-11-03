@@ -154,4 +154,9 @@ F3Client
     .Last()
 ```    
 
-    
+##Building
+
+```
+docker build -t shawnritchie/interview-accountapi-master:1.0 .
+docker run shawnritchie/interview-accountapi-master:1.0
+```

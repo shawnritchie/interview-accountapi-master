@@ -8,10 +8,10 @@ import (
 
 type listBuilder struct {
 	AccountAttributes
-	client 		*F3Client
-	Page 		int
-	PageSize	int
-	response	*PaginatedPayload
+	client   *F3Client
+	Page     int
+	PageSize int
+	response *PaginatedPayload
 }
 
 type ListBuilder interface {
@@ -31,8 +31,8 @@ type Paginator interface {
 
 func newListBuilder(client *F3Client) ListBuilder {
 	return listBuilder{
-		client: client,
-		Page: 0,
+		client:   client,
+		Page:     0,
 		PageSize: 100,
 	}
 }
@@ -184,7 +184,7 @@ func (l listBuilder) internalRequest(url string, ctx context.Context, response c
 
 func logPaginatedError(err error, response chan<- *PaginatedPayload, errors chan<- []error) {
 	close(response)
-	errors <- []error { err }
+	errors <- []error{err}
 	close(errors)
 }
 

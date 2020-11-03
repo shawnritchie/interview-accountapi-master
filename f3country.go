@@ -6,6 +6,7 @@ import (
 )
 
 type Country string
+
 var zeroValueCountry = Country("")
 
 func NewCountry(cc string) Country {
@@ -30,7 +31,6 @@ type InvalidCountry struct {
 func (e *InvalidCountry) Error() string {
 	return fmt.Sprintf("invalid Country code %q. supported ISO 3166-1 formats e.g. 'GB', 'FR'", e.country)
 }
-
 
 var Countries = map[string]Country{
 	"AF": Country("AF"),

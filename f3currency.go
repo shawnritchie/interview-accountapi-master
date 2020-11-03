@@ -6,6 +6,7 @@ import (
 )
 
 type Currency string
+
 var zeroValueCurrency = Currency("")
 
 func NewCurrency(c string) Currency {
@@ -14,7 +15,7 @@ func NewCurrency(c string) Currency {
 
 func (c *Currency) IsValid() error {
 	if _, ok := Currencies[string(*c)]; !ok {
-		return  &InvalidCurrency{*c}
+		return &InvalidCurrency{*c}
 	}
 	return nil
 }

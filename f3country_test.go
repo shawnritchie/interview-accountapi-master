@@ -12,7 +12,7 @@ func TestZeroValueCurrency(t *testing.T) {
 }
 
 func TestCountryValidation(t *testing.T) {
-	countryCodes := []struct{
+	countryCodes := []struct {
 		scenario    string
 		countryStr  string
 		expectError bool

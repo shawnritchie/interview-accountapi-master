@@ -5,7 +5,6 @@ import (
 	"fmt"
 )
 
-
 func ExampleF3CreateAccount() {
 	f3Client, err := NewF3Client()
 	if err != nil {
@@ -25,8 +24,8 @@ func ExampleF3CreateAccount() {
 		WithAccountClassification("Personal").
 		Request(context.Background(), response, errors)
 
-	<- response
-	<- errors
+	<-response
+	<-errors
 }
 
 func ExampleF3FetchAccount() {
@@ -42,10 +41,9 @@ func ExampleF3FetchAccount() {
 		WithAccountId("81d62ace-23f2-4aff-a7d6-60d7674bc5bb").
 		Request(context.Background(), response, errors)
 
-	<- response
-	<- errors
+	<-response
+	<-errors
 }
-
 
 func ExampleF3ListAccount() {
 	f3Client, err := NewF3Client()
@@ -65,10 +63,10 @@ func ExampleF3ListAccount() {
 		Request(context.Background(), firstResponse, firstErrors).
 		Last(context.Background(), lastResponse, lastErrors)
 
-	<- firstResponse
-	<- firstErrors
-	<- lastResponse
-	<- lastErrors
+	<-firstResponse
+	<-firstErrors
+	<-lastResponse
+	<-lastErrors
 }
 
 func ExampleF3DeleteAccount() {
@@ -84,5 +82,5 @@ func ExampleF3DeleteAccount() {
 		WithVersion(0).
 		Request(context.Background(), errors)
 
-	<- errors
+	<-errors
 }

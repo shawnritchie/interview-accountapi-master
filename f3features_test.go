@@ -11,9 +11,20 @@ import (
 )
 
 func init() {
-	_ = os.Setenv("F3BaseURL", "localhost:8080")
-	_ = os.Setenv("F3Timeout", "60s")
-	_ = os.Setenv("F3MaxRetries", "3")
+	if os.Getenv("F3BaseURL") == "" {
+		Logger.Printf("F3BaseURL environment variable not set. defaulting to 'localhost:8080'")
+		_ = os.Setenv("F3BaseURL", "localhost:8080")
+	}
+
+	if os.Getenv("F3Timeout") == "" {
+		Logger.Printf("F3BaseURL environment variable not set. defaulting to '60s'")
+		_ = os.Setenv("F3Timeout", "60s")
+	}
+
+	if os.Getenv("F3MaxRetries") == "" {
+		Logger.Printf("F3BaseURL environment variable not set. defaulting to '3'")
+		_ = os.Setenv("F3MaxRetries", "3")
+	}
 }
 
 func validAccount(f3Client *F3Client) CreateBuilder {
@@ -222,10 +233,10 @@ func (state *f3ClientState) iSendRequestToForPageWithAPageSizeOf(method, path st
 	errors := make(chan []error, 1)
 
 	state.Paginator = state.F3Client.
-							List().
-							WithPage(page).
-							WithPageSize(size).
-							Request(context.Background(), response, errors)
+		List().
+		WithPage(page).
+		WithPageSize(size).
+		Request(context.Background(), response, errors)
 
 	state.errors = <-errors
 	state.PaginatedPayload = <-response
@@ -315,7 +326,7 @@ func (state *f3ClientState) weExpectAHttpStatusCodeConflict() error {
 	return nil
 }
 
-func (state *f3ClientState) weExpectNoValidationErrors() error  {
+func (state *f3ClientState) weExpectNoValidationErrors() error {
 	if state.errors != nil && len(state.errors) > 0 {
 		return fmt.Errorf("we were expecting no validation errors yet we encountered %v", state.errors)
 	}
@@ -370,7 +381,6 @@ func (state *f3ClientState) weValidateTheAccountBuilderWithProperties(requestTyp
 
 	return nil
 }
-
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	state := &f3ClientState{}

@@ -10,10 +10,10 @@ import (
 
 type createBuilder struct {
 	AccountAttributes
-	client *F3Client
+	client         *F3Client
 	OrganisationId UUID
-	Type string
-	AccountId UUID
+	Type           string
+	AccountId      UUID
 }
 
 type CreateBuilder interface {
@@ -43,7 +43,7 @@ type CreateBuilder interface {
 func newAccountBuilder(client *F3Client) CreateBuilder {
 	return createBuilder{
 		client: client,
-		Type: ACCOUNTTYPE,
+		Type:   ACCOUNTS,
 	}
 }
 
@@ -76,7 +76,35 @@ func (ab createBuilder) Request(ctx context.Context, response chan<- *Payload, e
 	return ab
 }
 
-func (ab createBuilder) internalRequest(reqPayload * Payload, ctx context.Context, response chan<- *Payload, errors chan<- []error) {
+func build(u createBuilder) *Payload {
+	return &Payload{
+		Data: Data{
+			Id:             u.AccountId,
+			OrganisationId: u.OrganisationId,
+			RecordType:     u.Type,
+			Attributes: AccountAttributes{
+				Country:                 u.Country,
+				BaseCurrency:            u.BaseCurrency,
+				BankId:                  u.BankId,
+				BankIdCode:              u.BankIdCode,
+				AccountNumber:           u.AccountNumber,
+				Bic:                     u.Bic,
+				Iban:                    u.Iban,
+				CustomerId:              u.CustomerId,
+				Name:                    u.Name,
+				AlternativeNames:        u.AlternativeNames,
+				AccountClassification:   u.AccountClassification,
+				JointAccount:            u.JointAccount,
+				AccountMatchingOptOut:   u.AccountMatchingOptOut,
+				SecondaryIdentification: u.SecondaryIdentification,
+				Switched:                u.Switched,
+				Status:                  u.Status,
+			},
+		},
+	}
+}
+
+func (ab createBuilder) internalRequest(reqPayload *Payload, ctx context.Context, response chan<- *Payload, errors chan<- []error) {
 	byteArray, err := json.Marshal(reqPayload)
 	if err != nil {
 		Logger.Println("error marshalling json payload for account creation")
@@ -102,8 +130,6 @@ func (ab createBuilder) internalRequest(reqPayload * Payload, ctx context.Contex
 
 	logPayloadResponse(res, response, errors)
 }
-
-
 
 func (ab createBuilder) WithCountry(country Country) CreateBuilder {
 	ab.Country = country
@@ -194,4 +220,3 @@ func (ab createBuilder) WithAccountId(accountId UUID) CreateBuilder {
 	ab.AccountId = accountId
 	return ab
 }
-

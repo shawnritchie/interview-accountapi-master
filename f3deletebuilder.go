@@ -8,9 +8,9 @@ import (
 )
 
 type deleteBuilder struct {
-	client 		*F3Client
-	AccountId 	UUID
-	Version		int
+	client    *F3Client
+	AccountId UUID
+	Version   int
 }
 
 type DeleteBuilder interface {
@@ -95,7 +95,7 @@ func (d deleteBuilder) internalRequest(ctx context.Context, errors chan<- []erro
 }
 
 func logError(err error, errors chan<- []error) {
-	errors <- []error { err }
+	errors <- []error{err}
 	close(errors)
 }
 

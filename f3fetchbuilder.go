@@ -8,7 +8,7 @@ import (
 )
 
 type fetchBuilder struct {
-	client *F3Client
+	client    *F3Client
 	AccountId UUID
 }
 

@@ -5,13 +5,13 @@ import (
 	"regexp"
 )
 
-const(
-	PENDING 	Status		 	= "pending"
-	CONFIRMED	Status			= "confirmed"
-	FAILED		Status			= "failed"
+const (
+	PENDING   Status = "pending"
+	CONFIRMED Status = "confirmed"
+	FAILED    Status = "failed"
 
-	PERSONAL 	Classification	= "Personal"
-	BUSINESS	Classification	= "Business"
+	PERSONAL Classification = "Personal"
+	BUSINESS Classification = "Business"
 )
 
 type TypeValidator interface {
@@ -20,6 +20,7 @@ type TypeValidator interface {
 }
 
 type Classification string
+
 var zeroValueClassification = Classification("")
 
 func (c *Classification) IsValid() error {
@@ -36,6 +37,7 @@ func (c *Classification) IsZeroValue() bool {
 }
 
 type Status string
+
 var zeroValueStatus = Status("")
 
 func (s *Status) IsValid() error {
@@ -51,6 +53,7 @@ func (s *Status) IsZeroValue() bool {
 }
 
 type SwiftCode string
+
 var swiftCodeRegex = "^([A-Z]{6}[A-Z0-9]{2}|[A-Z]{6}[A-Z0-9]{5})$"
 var zeroValueSwiftCode = SwiftCode("")
 
@@ -68,12 +71,13 @@ func (sc *SwiftCode) IsZeroValue() bool {
 }
 
 type IBAN string
+
 var ibanRegex string = "^[A-Z]{2}[0-9]{2}[A-Z0-9]{0,64}$"
 var zeroValueIBAN = IBAN("")
 
 func (i *IBAN) IsValid() error {
 	if l := len(*i); l < 16 || l > 34 {
-		return  fmt.Errorf("invalid IBAN %q. Length: %d - min minLength 16 characters", *i, len(*i))
+		return fmt.Errorf("invalid IBAN %q. Length: %d - min minLength 16 characters", *i, len(*i))
 	}
 
 	match, _ := regexp.MatchString(ibanRegex, string(*i))
@@ -89,10 +93,11 @@ func (i *IBAN) IsZeroValue() bool {
 }
 
 type Identifier string
+
 var zeroValueIdentifier = Identifier("")
 
 func (i *Identifier) IsValid() error {
-	if l := len(*i); l ==0 || l > 140 {
+	if l := len(*i); l == 0 || l > 140 {
 		return fmt.Errorf("invalid Identifier %q. Length: %d - max minLength 140 characters", *i, len(*i))
 	}
 	return nil
@@ -103,11 +108,12 @@ func (i *Identifier) IsZeroValue() bool {
 }
 
 type BankId string
+
 var zeroValueBankId = BankId("")
 
 func (bid *BankId) IsValid() error {
 	if l := len(*bid); l == 0 || l > 11 {
-		return  fmt.Errorf("invalid Bank Id %q. Length: %d - Max Length 11 characters", *bid, len(*bid))
+		return fmt.Errorf("invalid Bank Id %q. Length: %d - Max Length 11 characters", *bid, len(*bid))
 	}
 	return nil
 }
@@ -117,6 +123,7 @@ func (bid *BankId) IsZeroValue() bool {
 }
 
 type UUID string
+
 var uuidValidation = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"
 var zeroValueUUID = UUID("")
 
