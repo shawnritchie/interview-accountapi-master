@@ -35,7 +35,7 @@ errcheck .
 - Pro
     - Client library could avoid the repetition of code, especially if 
     the api is extensive and complex this could increase development lead 
-    time and hand hold engineers in its proper usage
+    time and hand hold engineers in its proper usage and avoid any potential bugs
 - Cons
     - Version could create a headache if left unattended too whereby multiple
     clients could be using different versions of the client library. This could 
