@@ -82,19 +82,16 @@ Test proving the issues have been provided but have been commited out to make su
 4. No validation mapping the country requirements specified in the documentation highlight in the cucumber test
 5. The response is a mirror of the request parameters which does not match the specifications
 
-##### Fetch
-6. No UUID validation on the ID field inside of the payload
-
 ##### List
 7. Ignores the page size parameter and constantly return 1000 records
 
 ##### Delete
-8. Returns a 204 when deleting a non existent an account
+8. Returns a 204 when deleting a non-existent an account
 9. Deleting an account with the incorrect version number returns a 404 instead of a 409
 
 ## Future Improvements
 - Validation of host environmental variable to make sure it matches the library expectations
-- Research more indepth the use of channels in the context of how the client API has been designed seeing the current 
+- Research more in depth the use of channels in the context of how the client API has been designed seeing the current 
 design makes use of one time use channel seeing it closes the channel once the results are posted.
 - Test for race conditions / potential deadlock in the builders especially the list builder using shared state for page traversal
 - Do further testing especially on the Request method for each of the API as it wasn't tested as extensively as the UnsafeRequest

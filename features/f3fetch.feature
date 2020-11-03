@@ -12,12 +12,12 @@ Feature: Form 3 Organisation - Account Client
     When I send "GET" request to "/v1/organisation/accounts/" with the accountId
     Then we expect a valid response
 
-#  Scenario: fetching an account with an invalid uuid
-#    Given an initiated Client
-#    And a random organisationId
-#    And an invalid accountId
-#    When I send "GET" request to "/v1/organisation/accounts/" with the accountId
-#    Then we expect a validation error
+  Scenario: fetching an account with an invalid uuid
+    Given an initiated Client
+    And a random organisationId
+    And an invalid accountId
+    When I send "GET" request to "/v1/organisation/accounts/" with the accountId
+    Then we expect a bad request response
 
   Scenario: fetching an account for an account which does not exist
     Given an initiated Client
