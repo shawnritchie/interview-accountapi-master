@@ -84,10 +84,11 @@ Test proving the issues have been provided but have been commited out to make su
 
 ##### List
 7. Ignores the page size parameter and constantly return 1000 records
+2. Next is not given as a link when there are less than a single page of clients
 
 ##### Delete
-8. Returns a 204 when deleting a non-existent an account
-9. Deleting an account with the incorrect version number returns a 404 instead of a 409
+1. Returns a 204 when deleting a non-existent an account
+2. Deleting an account with the incorrect version number returns a 404 instead of a 409
 
 ## Future Improvements
 - Validation of host environmental variable to make sure it matches the library expectations

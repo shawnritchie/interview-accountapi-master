@@ -13,14 +13,14 @@ Feature: Form 3 Organisation - Account Client
     Then we expect a valid response
 #    And a page size of 1
 
-  Scenario: get first page from list api
-    Given an initiated Client
-    And a random organisationId
-    And a random accountId
-    And a valid account has been registered
-    And I send "GET" request to "/v1/organisation/accounts/" for page 1 with a page size of 1
-    When I navigate to the next page
-    Then we expect a valid response
+#  Scenario: get first page from list api
+#    Given an initiated Client
+#    And a random organisationId
+#    And a random accountId
+#    And a valid account has been registered
+#    And I send "GET" request to "/v1/organisation/accounts/" for page 1 with a page size of 1
+#    When I navigate to the next page
+#    Then we expect a valid response
 #    And a page size of 1
 
   Scenario: get previous page from list api
@@ -28,8 +28,7 @@ Feature: Form 3 Organisation - Account Client
     And a random organisationId
     And a random accountId
     And a valid account has been registered
-    And I send "GET" request to "/v1/organisation/accounts/" for page 1 with a page size of 1
-    And I navigate to the next page
+    And I send "GET" request to "/v1/organisation/accounts/" for page 2 with a page size of 1
     When I navigate to the previous page
     Then we expect a valid response
 #    And a page size of 1
@@ -39,8 +38,7 @@ Feature: Form 3 Organisation - Account Client
     And a random organisationId
     And a random accountId
     And a valid account has been registered
-    And I send "GET" request to "/v1/organisation/accounts/" for page 1 with a page size of 1
-    And I navigate to the next page
+    And I send "GET" request to "/v1/organisation/accounts/" for page 2 with a page size of 1
     When I navigate to the first page
     Then we expect a valid response
 #    And a page size of 1
