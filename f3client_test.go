@@ -2,13 +2,12 @@ package form3
 
 import (
 	"context"
-	"fmt"
 )
 
 func ExampleF3CreateAccount() {
 	f3Client, err := NewF3Client()
 	if err != nil {
-		fmt.Errorf("F3Client could not be initalized please check environmental variables 'F3BaseURL' is set up correct %w", err)
+		return
 	}
 
 	response := make(chan *Payload, 1)
@@ -31,7 +30,7 @@ func ExampleF3CreateAccount() {
 func ExampleF3FetchAccount() {
 	f3Client, err := NewF3Client()
 	if err != nil {
-		fmt.Errorf("F3Client could not be initalized please check environmental variables 'F3BaseURL' is set up correct %w", err)
+		return
 	}
 
 	response := make(chan *Payload, 1)
@@ -48,7 +47,7 @@ func ExampleF3FetchAccount() {
 func ExampleF3ListAccount() {
 	f3Client, err := NewF3Client()
 	if err != nil {
-		fmt.Errorf("F3Client could not be initalized please check environmental variables 'F3BaseURL' is set up correct %w", err)
+		return
 	}
 
 	firstResponse := make(chan *PaginatedPayload, 1)
@@ -72,7 +71,7 @@ func ExampleF3ListAccount() {
 func ExampleF3DeleteAccount() {
 	f3Client, err := NewF3Client()
 	if err != nil {
-		fmt.Errorf("F3Client could not be initalized please check environmental variables 'F3BaseURL' is set up correct %w", err)
+		return
 	}
 
 	errors := make(chan []error, 1)
